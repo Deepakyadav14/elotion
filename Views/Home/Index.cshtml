@@ -1,0 +1,153 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+   
+}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $("#btn2").hide();
+        print_record();
+        $("#btn").click(function () {
+            var d = $("#form").serializeArray();
+            $.ajax({
+                url: '/home/insert',
+                type: 'post', 
+                data: d,
+                dataType: 'json',
+                success: function (res) {
+                   // alert(res);
+                    document.getElementById("form").reset();
+                    print_record();
+                }
+            })
+        })
+        $("#qnt").change(function () {
+            cal();
+        })
+        $("#price").change(function () {
+            cal();
+        })
+        $("#btn2").click(function () {
+            var d = $("#form").serializeArray();
+            $.ajax({
+                url: '/home/update',
+                type: 'post',
+                data: d,
+                dataType: 'json',
+                success: function (res) {
+                     alert(res);
+                   document.getElementById("form").reset();
+                    print_record();
+                }
+            })
+        })
+    })
+
+
+  
+    function print_record() {
+        $.ajax({
+            url: '/home/Getdata',
+            type: 'get',
+            dataType: 'json',
+            success: function (res) {
+                $("#tbl tbody").empty();
+
+                $.each(res, function (index, element) {
+                    $("#tbl tbody").append("<tr><td>" + element.product + "</td><td>" + element.category + "</td><td>" + element.price + "</td><td>" + element.quantity + "</td><td>" + element.total + "</td><td><span class='btn btn-outline-danger' onclick='delrecord(" + element.id + ")'>Delete</span>&nbsp &nbsp <span class='btn btn-outline-info' onclick='getrecord(" + element.id + ")'>Update</span></td></tr>")
+                })
+
+            }
+        })
+    }
+
+    function delrecord(a) {
+        $.ajax({
+            url: '/home/delete',
+            type: 'post',
+            data: { 'a': a },
+            dataType: 'json',
+            success: function () {
+                print_record();
+            }
+        })
+    }
+
+
+    function getrecord(id) {
+       
+        $("#btn").hide();
+        $("#btn2").show();
+
+        $("#id").show();
+        
+        $.ajax({
+            url: '/home/getone',
+            type: 'get',
+            data: { 'id': id },
+            dataType: 'json',
+            success: function (res) {
+                $.each(res, function (element, res) {
+                    $("#id").val(res.id)
+                    $("#product").val(res.product)
+                    $("#category").val(res.category)
+                    $("#price").val(res.price)
+                    $("#qnt").val(res.quantity)
+                    $("#total").val(res.total)
+                })
+               
+
+
+            }
+        })
+       
+    }
+    function cal() {
+        var a = $("#price").val();
+        var b = $("#qnt").val();
+        $("#total").val(a*b);
+    }
+    
+   
+</script>
+
+
+
+
+
+
+<div>
+    <form  method="post" id="form">
+
+       ID:<input type="number" readonly name="id" value="" id="id" class="m-2" /> <br />
+        Product:<input type="text" name="product" value="" id="product" class="m-2" /> <br />
+        Category:<input type="text" name="category" value="" id="category" class="m-2" /> <br />
+        Price :<input type="number" name="price" value="" id="price" class="m-2" /> <br />
+        Quantity:<input type="number" name="quantity" value="" id="qnt" class="m-2" /> <br />
+        Total:<input type="number" readonly name="total" value="" id="total" class="m-2" /> <br />
+        <input type="submit" value="Submit" id="btn" />
+        <input type="button" value="Update" id="btn2" /> <br /> <br />
+       
+    </form> 
+
+
+    <table class=" table table-bordered" id="tbl">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+
+        </thead>
+        <tbody>
+        </tbody>
+
+
+    </table>
+</div>
